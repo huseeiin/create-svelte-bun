@@ -162,7 +162,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		})
 	}
 
-	// When using Bun.$ (or Bun.spawn) here it thinks dependencies like are git repositories?
+	// When using Bun.$ (or Bun.spawn) here it thinks dependencies are git repositories?
 	await exec(
 		`bun i ${DEPENDENCIES.join(' ')} && bun i ${DEV_DEPENDENCIES.join(
 			' '
