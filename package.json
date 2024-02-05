@@ -1,0 +1,32 @@
+{
+	"name": "create-svelte-bun",
+	"version": "1.1.8",
+	"scripts": {
+		"build": "bun build src/index.ts --minify --target bun --outdir dist",
+		"test": "bun build src/index.ts --minify --target bun --outdir dist && bun dist/index.js",
+		"publish": "bun run build && npm publish",
+		"lint": "tsc && biome check --apply-unsafe ./src"
+	},
+	"dependencies": {
+		"@biomejs/biome": "^1.5.3",
+		"@clack/prompts": "^0.7.0",
+		"@faker-js/faker": "^8.4.0",
+		"filenamify": "^6.0.0",
+		"kolorist": "^1.8.0"
+	},
+	"bin": {
+		"create-svelte-bun": "dist/index.js"
+	},
+	"devDependencies": {
+		"@tsconfig/strictest": "^2.0.2",
+		"@types/bun": "^1.0.4",
+		"typescript": "^5.3.3"
+	},
+	"prettier": {
+		"arrowParens": "avoid",
+		"bracketSpacing": false,
+		"semi": false,
+		"singleQuote": true,
+		"trailingComma": "none"
+	}
+}
