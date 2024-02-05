@@ -42,7 +42,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		process.exit(0)
 	}
 
-	// Process exists when using `await exists` instead of `existsSync` here.
+	// Process exists when using `await exists` instead of `existsSync` here? https://github.com/oven-sh/bun/issues/8696
 	if (existsSync(projectName)) {
 		log.error(
 			'A file or directory with the same name exists. Trying a different one.'
@@ -162,6 +162,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		})
 	}
 
+	// When using Bun.$ (or Bun.spawn) here it thinks dependencies like are git repositories?
 	await exec(
 		`bun i ${DEPENDENCIES.join(' ')} && bun i ${DEV_DEPENDENCIES.join(
 			' '
@@ -170,15 +171,17 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 	s.stop()
 
-	await exec('bun svelte-kit sync')
+	// When using Bun.$ (or Bun.spawn) here it thinks `svelte-kit` is necessarily a package.json script?
+	await exec('bun run svelte-kit sync')
 
 	outro('🚀 Project created successfully! Thank you for your patience.')
 
+	// Bun.$ logs stdout without asking it to?
 	if (!(await Bun.$`which code`).exitCode) {
 		const open = await confirm({message: 'Open in VSCode?'})
 
 		if (isCancel(open)) cancel()
 
-		if (open === true) await exec('code .')
+		if (open === true) Bun.spawn(['code', '.'], {cwd: projectName})
 	}
 })()
