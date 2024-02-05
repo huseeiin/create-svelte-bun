@@ -171,7 +171,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 	s.stop()
 
-	// This fails when project name is ":"
+	// This fails when project name is ":" https://github.com/oven-sh/bun/issues/8705
 	await exec('bun run svelte-kit sync')
 
 	outro('🚀 Project created successfully! Thank you for your patience.')
