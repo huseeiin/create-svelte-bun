@@ -162,7 +162,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		})
 	}
 
-	// When using Bun.$ (or Bun.spawn) here it thinks dependencies are git repositories?
+	// When using Bun.$ (or Bun.spawn) here it thinks dependencies are git repositories? https://github.com/oven-sh/bun/issues/8699
 	await exec(
 		`bun i ${DEPENDENCIES.join(' ')} && bun i ${DEV_DEPENDENCIES.join(
 			' '
@@ -171,12 +171,12 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 	s.stop()
 
-	// When using Bun.$ (or Bun.spawn) here it thinks `svelte-kit` is necessarily a package.json script?
+	// When using Bun.$ (or Bun.spawn) here it thinks `svelte-kit` is necessarily a package.json script? https://github.com/oven-sh/bun/issues/8700
 	await exec('bun run svelte-kit sync')
 
 	outro('🚀 Project created successfully! Thank you for your patience.')
 
-	// Bun.$ logs stdout without asking it to?
+	// Bun.$ logs stdout without asking it to? https://github.com/oven-sh/bun/issues/8701
 	if (!(await Bun.$`which code`).exitCode) {
 		const open = await confirm({message: 'Open in VSCode?'})
 
