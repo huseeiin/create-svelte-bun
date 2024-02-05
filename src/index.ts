@@ -12,8 +12,9 @@ import {
 } from '@clack/prompts'
 import {faker} from '@faker-js/faker'
 import {existsSync} from 'fs'
-import {bgGray, bgYellow, green} from 'kolorist'
+import {bgGray, bgYellow, green, bold} from 'kolorist'
 import {DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, packageJson} from './consts'
+import filenamify from 'filenamify'
 
 intro(bgYellow('Create a new SvelteKit app using Bun.'))
 ;(async function createProject() {
@@ -42,8 +43,14 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		process.exit(0)
 	}
 
+	const normalizedProjectName = filenamify(projectName)
+	if (normalizedProjectName !== projectName)
+		log.warn(
+			`Project name after normalization: ${bold(normalizedProjectName)}`
+		)
+
 	// Process exists when using `await exists` instead of `existsSync` here? https://github.com/oven-sh/bun/issues/8696
-	if (existsSync(projectName)) {
+	if (existsSync(normalizedProjectName)) {
 		log.error(
 			'A file or directory with the same name exists. Trying a different one.'
 		)
@@ -52,9 +59,9 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 	}
 
 	log.info(
-		`Project path: ${Bun.pathToFileURL(projectName).href.replace(
-			projectName,
-			green(projectName)
+		`Project path: ${Bun.pathToFileURL(normalizedProjectName).href.replace(
+			normalizedProjectName,
+			green(normalizedProjectName)
 		)}`
 	)
 
@@ -98,12 +105,15 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		process.exit(0)
 	}
 
-	await Bun.$`cp -r ${import.meta.dir}/files ${projectName}`
-
-	await Bun.write(`${projectName}/package.json`, JSON.stringify(packageJson))
+	await Bun.$`cp -r ${import.meta.dir}/files ${normalizedProjectName}`
 
 	await Bun.write(
-		`${projectName}/tsconfig.json`,
+		`${normalizedProjectName}/package.json`,
+		JSON.stringify(packageJson)
+	)
+
+	await Bun.write(
+		`${normalizedProjectName}/tsconfig.json`,
 		JSON.stringify({
 			extends: './.svelte-kit/tsconfig.json',
 			compilerOptions: {
@@ -121,7 +131,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		Object.assign(packageJson.scripts, {lint: 'biome lint ./src'})
 
 		await Bun.write(
-			`${projectName}/biome.json`,
+			`${normalizedProjectName}/biome.json`,
 			JSON.stringify({
 				$schema: 'https://biomejs.dev/schemas/1.5.2/schema.json',
 				linter: {
@@ -135,7 +145,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 	}
 
 	await Bun.write(
-		`${projectName}/.vscode/extensions.json`,
+		`${normalizedProjectName}/.vscode/extensions.json`,
 		JSON.stringify(EXTENSIONS)
 	)
 
@@ -149,8 +159,8 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 				cmd,
 				{
 					cwd:
-						typeof projectName === 'string'
-							? projectName
+						typeof normalizedProjectName === 'string'
+							? normalizedProjectName
 							: undefined
 				},
 				(error, stdout) => {
@@ -171,7 +181,6 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 	s.stop()
 
-	// When using Bun.$ (or Bun.spawn) here it thinks `svelte-kit` is necessarily a package.json script? https://github.com/oven-sh/bun/issues/8700
 	await exec('bun run svelte-kit sync')
 
 	outro('🚀 Project created successfully! Thank you for your patience.')
@@ -182,6 +191,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 		if (isCancel(open)) cancel()
 
-		if (open === true) Bun.spawn(['code', '.'], {cwd: projectName})
+		if (open === true)
+			Bun.spawn(['code', '.'], {cwd: normalizedProjectName})
 	}
 })()
