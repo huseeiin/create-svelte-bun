@@ -172,8 +172,6 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 	s.stop()
 
 	// This fails when project name is ":"
-	console.log({projectName})
-
 	await exec('bun run svelte-kit sync')
 
 	outro('🚀 Project created successfully! Thank you for your patience.')
