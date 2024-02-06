@@ -1,13 +1,14 @@
 {
-  "extends": "@tsconfig/strictest/tsconfig.json",
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "Bundler",
-    "moduleDetection": "force",
-    "allowArbitraryExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true
-  },
-  "include": ["src"]
+	"extends": "@tsconfig/strictest/tsconfig.json",
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"moduleDetection": "force",
+		"allowArbitraryExtensions": true,
+		"verbatimModuleSyntax": true,
+		"noEmit": true,
+		"lib": ["ESNext"]
+	},
+	"include": ["src"]
 }
