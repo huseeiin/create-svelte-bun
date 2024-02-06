@@ -1,6 +1,6 @@
 {
 	"name": "create-svelte-bun",
-	"version": "1.2.5",
+	"version": "1.2.6",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/huseeiin/create-svelte-bun.git"
@@ -16,7 +16,6 @@
 		"@biomejs/biome": "^1.5.3",
 		"@clack/prompts": "^0.7.0",
 		"@faker-js/faker": "^8.4.0",
-		"filenamify": "^6.0.0",
 		"kolorist": "^1.8.0"
 	},
 	"bin": {
