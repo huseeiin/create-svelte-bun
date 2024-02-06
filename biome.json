@@ -3,8 +3,9 @@
 	"linter": {
 		"rules": {
 			"all": true,
-			"nursery": {"noNodejsModules": "off"},
-			"correctness": {"noUndeclaredVariables": "off"}
+			"nursery": {"all": true, "noNodejsModules": "off"},
+			"correctness": {"all": true, "noUndeclaredVariables": "off"},
+			"style": {"all": true, "useBlockStatements": "off"}
 		},
 		"ignore": ["build", ".svelte-kit", "node_modules"]
 	},

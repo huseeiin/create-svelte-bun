@@ -1,19 +1,10 @@
 #!/usr/bin/env bun
-import childProcess from 'node:child_process'
 import {existsSync} from 'node:fs'
-import {
-	cancel,
-	confirm,
-	intro,
-	isCancel,
-	log,
-	outro,
-	spinner,
-	text
-} from '@clack/prompts'
+import {cancel, confirm, intro, isCancel, log, outro, spinner, text} from '@clack/prompts'
 import {faker} from '@faker-js/faker'
 import {bgGray, bgYellow, green} from 'kolorist'
-import {DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, packageJson} from './consts'
+import {BIOME, DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, packageJson} from './consts'
+import {$, pathToFileURL, spawn, which, write} from 'bun'
 
 intro(bgYellow('Create a new SvelteKit app using Bun.'))
 ;(async function createProject() {
@@ -33,24 +24,17 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 	// Process exists when using `await exists` instead of `existsSync` here? https://github.com/oven-sh/bun/issues/8696
 	if (existsSync(projectName)) {
-		log.error(
-			'A file or directory with the same name exists. Trying a different one.'
-		)
+		log.error('A file or directory with the same name exists. Trying a different one.')
 
 		return createProject()
 	}
 
 	log.info(
-		`Project path: ${Bun.pathToFileURL(projectName).href.replace(
-			projectName,
-			green(projectName)
-		)}`
+		`Project path: ${pathToFileURL(projectName).href.replace(projectName, green(projectName))}`
 	)
 
 	const check = await confirm({
-		message: `Use ${bgGray(
-			'svelte-check'
-		)} for typechecking and Svelte code quality?`
+		message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
 	})
 
 	if (isCancel(check)) {
@@ -87,12 +71,12 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		process.exit(0)
 	}
 
-	await Bun.$`cp -r ${import.meta.dir}/files ${projectName}`
-	await Bun.$`mv ${projectName}/_gitignore ${projectName}/.gitignore`
+	await $`cp -r ${import.meta.dir}/files ${projectName}`
+	await $`mv ${projectName}/_gitignore ${projectName}/.gitignore`
 
-	await Bun.write(`${projectName}/package.json`, JSON.stringify(packageJson))
+	await write(`${projectName}/package.json`, JSON.stringify(packageJson))
 
-	await Bun.write(
+	await write(
 		`${projectName}/tsconfig.json`,
 		JSON.stringify({
 			extends: './.svelte-kit/tsconfig.json',
@@ -110,68 +94,44 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 		Object.assign(packageJson.scripts, {lint: 'biome lint ./src'})
 
-		await Bun.write(
-			`${projectName}/biome.json`,
-			JSON.stringify({
-				$schema: 'https://biomejs.dev/schemas/1.5.2/schema.json',
-				linter: {
-					ignore: ['build', '.svelte-kit', 'node_modules']
-				},
-				formatter: {
-					enabled: false
-				}
-			})
-		)
+		await write(`${projectName}/biome.json`, JSON.stringify(BIOME))
 	}
 
-	await Bun.write(
-		`${projectName}/.vscode/extensions.json`,
-		JSON.stringify(EXTENSIONS)
-	)
+	await write(`${projectName}/.vscode/extensions.json`, JSON.stringify(EXTENSIONS))
 
-	const s = spinner()
+	// const s = spinner()
 
-	s.start('Installing dependencies with Bun...')
+	// s.start('Installing dependencies with Bun...')
 
-	function exec(cmd: string): Promise<string> {
-		return new Promise((resolve, reject) => {
-			childProcess.exec(
-				cmd,
-				{
-					cwd:
-						typeof projectName === 'string'
-							? projectName
-							: undefined
-				},
-				(error, stdout) => {
-					if (error) { reject(error) }
+	// const prod = $`cd ${projectName} && bun i ${DEPENDENCIES.join(' ')}`
 
-					resolve(stdout)
-				}
-			)
-		})
-	}
+	const prod = spawn(['bun', 'i', ...DEPENDENCIES], {
+		cwd: projectName
+	})
 
-	// When using Bun.$ (or Bun.spawn) here it thinks dependencies are git repositories? https://github.com/oven-sh/bun/issues/8699
-	await exec(
-		`bun i ${DEPENDENCIES.join(' ')} && bun i ${DEV_DEPENDENCIES.join(
-			' '
-		)} -d`
-	)
+	await prod.exited
 
-	s.stop()
+	// const dev = $`cd ${projectName} && bun i ${DEPENDENCIES.join(' ')} -d`
 
-	// This fails when project name is ":" https://github.com/oven-sh/bun/issues/8705
-	await exec('bun run svelte-kit sync')
+	const dev = spawn(['bun', 'i', ...DEV_DEPENDENCIES, '-d'], {
+		cwd: projectName
+	})
+
+	await dev.exited
+
+	// s.stop()
+
+	const sync = spawn(['bun', 'svelte-kit', 'sync'], {cwd: projectName})
+
+	await sync.exited
 
 	outro('🚀 Project created successfully! Thank you for your patience.')
 
-	// Bun.$ logs stdout without asking it to? https://github.com/oven-sh/bun/issues/8701
-	if (Bun.which('code')) {
+	if (which('code')) {
 		const open = await confirm({message: 'Open in VSCode?'})
 
-		if (isCancel(open)) { cancel() }
+		if (isCancel(open)) cancel()
 
-		if (open === true) { Bun.spawn(['code', '.'], {cwd: projectName}) }
+		if (open === true) spawn(['code', '.'], {cwd: projectName})
 	}
 })()

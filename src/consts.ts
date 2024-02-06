@@ -32,3 +32,16 @@ export const EXTENSIONS = {
 		'svelte.svelte-vscode'
 	]
 }
+
+export const BIOME = {
+	$schema: 'https://biomejs.dev/schemas/1.5.2/schema.json',
+	linter: {
+		ignore: ['build', '.svelte-kit', 'node_modules'],
+		rules: {
+			all: true
+		}
+	},
+	formatter: {
+		enabled: false
+	}
+}
