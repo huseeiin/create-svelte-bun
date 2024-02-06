@@ -26,11 +26,7 @@ export const DEPENDENCIES = [
 export const DEV_DEPENDENCIES = ['typescript', '@types/bun']
 
 export const EXTENSIONS = {
-	recommendations: [
-		'EditorConfig.EditorConfig',
-		'esbenp.prettier-vscode',
-		'svelte.svelte-vscode'
-	]
+	recommendations: ['EditorConfig.EditorConfig', 'esbenp.prettier-vscode', 'svelte.svelte-vscode']
 }
 
 export const BIOME = {

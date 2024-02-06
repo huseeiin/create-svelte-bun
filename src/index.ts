@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 import {existsSync} from 'node:fs'
-import {cancel, confirm, intro, isCancel, log, outro, spinner, text} from '@clack/prompts'
+import {cancel, confirm, intro, isCancel, log, outro, text} from '@clack/prompts'
 import {faker} from '@faker-js/faker'
+import {$, pathToFileURL, spawn, which, write} from 'bun'
 import {bgGray, bgYellow, green} from 'kolorist'
 import {BIOME, DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, packageJson} from './consts'
-import {$, pathToFileURL, spawn, which, write} from 'bun'
 
 intro(bgYellow('Create a new SvelteKit app using Bun.'))
 ;(async function createProject() {
@@ -121,9 +121,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 	// s.stop()
 
-	const sync = spawn(['bun', 'svelte-kit', 'sync'], {cwd: projectName})
-
-	await sync.exited
+	await $`cd ${projectName} && bun svelte-kit sync`
 
 	outro('🚀 Project created successfully! Thank you for your patience.')
 
@@ -132,6 +130,6 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 		if (isCancel(open)) cancel()
 
-		if (open === true) spawn(['code', '.'], {cwd: projectName})
+		if (open === true) await $`code ${projectName}`
 	}
 })()
