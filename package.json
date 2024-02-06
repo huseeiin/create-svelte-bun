@@ -1,6 +1,6 @@
 {
 	"name": "create-svelte-bun",
-	"version": "1.2.2",
+	"version": "1.2.4",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/huseeiin/create-svelte-bun.git"

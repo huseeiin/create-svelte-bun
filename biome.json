@@ -1,9 +1,14 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.5.2/schema.json",
-  "linter": {
-    "ignore": ["build", ".svelte-kit", "node_modules"]
-  },
-  "formatter": {
-    "enabled": false
-  }
+	"$schema": "https://biomejs.dev/schemas/1.5.2/schema.json",
+	"linter": {
+		"rules": {
+			"all": true,
+			"nursery": {"noNodejsModules": "off"},
+			"correctness": {"noUndeclaredVariables": "off"}
+		},
+		"ignore": ["build", ".svelte-kit", "node_modules"]
+	},
+	"formatter": {
+		"enabled": false
+	}
 }

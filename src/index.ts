@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-import childProcess from 'child_process'
+import childProcess from 'node:child_process'
+import {existsSync} from 'node:fs'
 import {
 	cancel,
 	confirm,
@@ -11,30 +12,18 @@ import {
 	text
 } from '@clack/prompts'
 import {faker} from '@faker-js/faker'
-import {existsSync} from 'fs'
 import {bgGray, bgYellow, green} from 'kolorist'
 import {DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, packageJson} from './consts'
 
 intro(bgYellow('Create a new SvelteKit app using Bun.'))
 ;(async function createProject() {
-	const random = await confirm({
-		message: 'Use a random project name?',
-		initialValue: false
+	const random = `${faker.word.adjective()}-${faker.word.noun()}`
+
+	const projectName = await text({
+		message: 'Project name',
+		placeholder: random,
+		defaultValue: random
 	})
-
-	if (isCancel(random)) {
-		cancel('Operation cancelled.')
-
-		process.exit(0)
-	}
-
-	const projectName = random
-		? `${faker.word.adjective()}-${faker.word.noun()}`
-		: await text({
-				message: 'Project name',
-				placeholder: 'new-app',
-				defaultValue: 'new-app'
-		  })
 
 	if (isCancel(projectName)) {
 		cancel('Operation cancelled.')
@@ -99,6 +88,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 	}
 
 	await Bun.$`cp -r ${import.meta.dir}/files ${projectName}`
+	await Bun.$`mv ${projectName}/_gitignore ${projectName}/.gitignore`
 
 	await Bun.write(`${projectName}/package.json`, JSON.stringify(packageJson))
 
@@ -154,7 +144,7 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 							: undefined
 				},
 				(error, stdout) => {
-					if (error) reject(error)
+					if (error) { reject(error) }
 
 					resolve(stdout)
 				}
@@ -177,11 +167,11 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 	outro('🚀 Project created successfully! Thank you for your patience.')
 
 	// Bun.$ logs stdout without asking it to? https://github.com/oven-sh/bun/issues/8701
-	if (!(await Bun.$`which code`).exitCode) {
+	if (Bun.which('code')) {
 		const open = await confirm({message: 'Open in VSCode?'})
 
-		if (isCancel(open)) cancel()
+		if (isCancel(open)) { cancel() }
 
-		if (open === true) Bun.spawn(['code', '.'], {cwd: projectName})
+		if (open === true) { Bun.spawn(['code', '.'], {cwd: projectName}) }
 	}
 })()
