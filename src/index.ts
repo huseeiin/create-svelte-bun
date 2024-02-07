@@ -148,7 +148,7 @@ export async function createProject(opts: Options = {}) {
 
 	outro('🚀 Project created successfully! Thank you for your patience.')
 
-	if (which('code')) {
+	if (!api && which('code')) {
 		const open = await confirm({message: 'Open in VSCode?'})
 
 		if (isCancel(open)) cancel()
