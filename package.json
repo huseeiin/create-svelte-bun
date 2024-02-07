@@ -1,6 +1,6 @@
 {
 	"name": "create-svelte-bun",
-	"version": "1.3.2",
+	"version": "1.3.3",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/huseeiin/create-svelte-bun.git"
@@ -8,7 +8,7 @@
 	"homepage": "https://github.com/huseeiin/create-svelte-bun",
 	"scripts": {
 		"build": "bun build src/index.ts --target bun --outdir dist",
-		"test": "bun run build && bun link create-svelte-bun && create-svelte-bun",
+		"test": "bun run build && bun dist/index.js",
 		"release": "bun run build && npm publish",
 		"lint": "prettier . --write && tsc && biome check --apply-unsafe ./src",
 		"prepublish": "bun lint"

@@ -87,7 +87,7 @@ export async function createProject(opts: Options = {}) {
 		DEV_DEPENDENCIES.push('svelte-check')
 
 		Object.assign(packageJson.scripts, {
-			check: 'svelte-kit sync && svelte-check'
+			check: 'bun postinstall && svelte-check'
 		})
 	}
 
