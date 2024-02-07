@@ -7,8 +7,6 @@ import {bgGray, bgYellow, green} from 'kolorist'
 import {BIOME, DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, TSCONFIG, packageJson} from './consts'
 import {resolve} from 'node:path'
 
-intro(bgYellow('Create a new SvelteKit app using Bun.'))
-
 interface Options {
 	name?: string
 	svelteCheck?: boolean
@@ -16,19 +14,22 @@ interface Options {
 	strictTs?: boolean
 }
 
+const argv = process.argv.slice(2)
+
+const args: {[key: string]: string | boolean | undefined} = {}
+
+for (const [index, arg] of argv.entries()) {
+	const value = argv[index + 1]
+	if (arg.startsWith('-')) args[arg.replaceAll('-', '')] = value ? value : true
+}
+
 const api = /*!import.meta.main*/ false
+
+if (!api) intro(bgYellow('Create a new SvelteKit app using Bun.'))
+
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
 export async function createProject(opts: Options = {}) {
 	const random = `${faker.word.adjective()}-${faker.word.noun()}`
-
-	const argv = process.argv.slice(2)
-
-	const args: Record<string, string> = {}
-
-	for (const [index, arg] of argv.entries()) {
-		const value = argv[index + 1]
-		if (value) args[arg.replace('--', '')] = value
-	}
 
 	const projectName = api
 		? opts.name ?? random
@@ -48,18 +49,23 @@ export async function createProject(opts: Options = {}) {
 	if (typeof projectName !== 'string') return
 
 	if (existsSync(projectName)) {
+		if (api) throw new Error('A file or directory with the same name exists.')
+
 		log.error('A file or directory with the same name exists. Trying a different one.')
+
+		args.name = undefined
 
 		return createProject()
 	}
 
-	log.info(
+	;(api ? console.log : log.info)(
 		`Project path: ${pathToFileURL(projectName).href.replace(projectName, green(projectName))}`
 	)
 
 	const check = api
 		? opts.svelteCheck
-		: args.check ||
+		: args.y ||
+			args.check ||
 			(await confirm({
 				message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
 			}))
@@ -74,13 +80,14 @@ export async function createProject(opts: Options = {}) {
 		DEV_DEPENDENCIES.push('svelte-check')
 
 		Object.assign(packageJson.scripts, {
-			check: 'bun --bun svelte-kit sync && svelte-check'
+			check: 'svelte-kit sync && svelte-check'
 		})
 	}
 
 	const biome = api
 		? opts.biome
-		: args.biome ||
+		: args.y ||
+			args.biome ||
 			(await confirm({
 				message: 'Use Biome linter? (Svelte support is planned)'
 			}))
@@ -93,7 +100,8 @@ export async function createProject(opts: Options = {}) {
 
 	const strict = api
 		? opts.strictTs
-		: args.strict ||
+		: args.y ||
+			args.strict ||
 			(await confirm({
 				message: 'Use strict TypeScript?'
 			}))
@@ -143,10 +151,7 @@ export async function createProject(opts: Options = {}) {
 	await dev.exited
 
 	// s.stop()
-
-	await $`cd ${projectName} && bun svelte-kit sync`
-
-	outro('🚀 Project created successfully! Thank you for your patience.')
+	;(api ? console.log : outro)('🚀 Project created successfully! Thank you for your patience.')
 
 	if (!api && which('code')) {
 		const open = await confirm({message: 'Open in VSCode?'})

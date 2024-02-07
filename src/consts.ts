@@ -3,7 +3,8 @@ export const packageJson = {
 	scripts: {
 		start: 'bun build/index.js',
 		build: 'bun --bun vite build',
-		dev: 'bun --bun vite'
+		dev: 'bun --bun vite',
+		postinstall: 'svelte-kit sync'
 	},
 	prettier: {
 		arrowParens: 'avoid',
