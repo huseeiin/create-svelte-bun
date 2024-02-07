@@ -5,25 +5,47 @@ import {faker} from '@faker-js/faker'
 import {$, pathToFileURL, spawn, which, write} from 'bun'
 import {bgGray, bgYellow, green} from 'kolorist'
 import {BIOME, DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, TSCONFIG, packageJson} from './consts'
+import {resolve} from 'node:path'
 
 intro(bgYellow('Create a new SvelteKit app using Bun.'))
+
+interface Options {
+	name?: string
+	svelteCheck?: boolean
+	biome?: boolean
+	strictTs?: boolean
+}
+
+const api = /*!import.meta.main*/ false
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
-;(async function createProject() {
+export async function createProject(opts: Options = {}) {
 	const random = `${faker.word.adjective()}-${faker.word.noun()}`
 
-	const projectName =
-		process.argv[2] ??
-		(await text({
-			message: 'Project name',
-			placeholder: random,
-			defaultValue: random
-		}))
+	const argv = process.argv.slice(2)
 
-	if (isCancel(projectName)) {
+	const args: Record<string, string> = {}
+
+	for (const [index, arg] of argv.entries()) {
+		const value = argv[index + 1]
+		if (value) args[arg.replace('--', '')] = value
+	}
+
+	const projectName = api
+		? opts.name ?? random
+		: args.name ??
+			(await text({
+				message: 'Project name',
+				placeholder: random,
+				defaultValue: random
+			}))
+
+	if (!api && isCancel(projectName)) {
 		cancel('Operation cancelled.')
 
 		process.exit(0)
 	}
+
+	if (typeof projectName !== 'string') return
 
 	if (existsSync(projectName)) {
 		log.error('A file or directory with the same name exists. Trying a different one.')
@@ -35,11 +57,12 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		`Project path: ${pathToFileURL(projectName).href.replace(projectName, green(projectName))}`
 	)
 
-	const check =
-		process.argv.includes('--check') ||
-		(await confirm({
-			message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
-		}))
+	const check = api
+		? opts.svelteCheck
+		: args.check ||
+			(await confirm({
+				message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
+			}))
 
 	if (isCancel(check)) {
 		cancel('Operation cancelled.')
@@ -55,11 +78,12 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		})
 	}
 
-	const biome =
-		process.argv.includes('--biome') ||
-		(await confirm({
-			message: 'Use Biome linter? (Svelte support is planned)'
-		}))
+	const biome = api
+		? opts.biome
+		: args.biome ||
+			(await confirm({
+				message: 'Use Biome linter? (Svelte support is planned)'
+			}))
 
 	if (isCancel(biome)) {
 		cancel('Operation cancelled.')
@@ -67,11 +91,12 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		process.exit(0)
 	}
 
-	const strict =
-		process.argv.includes('--strict') ||
-		(await confirm({
-			message: 'Use strict TypeScript?'
-		}))
+	const strict = api
+		? opts.strictTs
+		: args.strict ||
+			(await confirm({
+				message: 'Use strict TypeScript?'
+			}))
 
 	if (isCancel(strict)) {
 		cancel('Operation cancelled.')
@@ -79,12 +104,12 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 		process.exit(0)
 	}
 
-	await $`cp -r ${import.meta.dir}/files ${projectName}`
+	await $`cp -r ${resolve(import.meta.dir, '../files')} ${projectName}`
 	await $`mv ${projectName}/_gitignore ${projectName}/.gitignore`
 
 	await write(`${projectName}/package.json`, JSON.stringify(packageJson))
 
-	await write(`${projectName}/tsconfig.json`, TSCONFIG(strict))
+	await write(`${projectName}/tsconfig.json`, TSCONFIG(!!strict))
 
 	if (biome) {
 		DEV_DEPENDENCIES.push('@biomejs/biome')
@@ -130,4 +155,6 @@ intro(bgYellow('Create a new SvelteKit app using Bun.'))
 
 		if (open === true) await $`code ${projectName}`
 	}
-})()
+}
+
+if (!api) createProject()
