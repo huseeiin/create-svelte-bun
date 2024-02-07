@@ -9,7 +9,7 @@
 	"scripts": {
 		"build": "bun build src/index.ts --target bun --outdir dist",
 		"test": "bun run build && bun link create-svelte-bun && create-svelte-bun",
-		"publish": "bun run build && npm publish",
+		"release": "bun run build && npm publish",
 		"lint": "prettier . --write && tsc && biome check --apply-unsafe ./src",
 		"prepublish": "bun lint"
 	},
