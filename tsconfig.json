@@ -8,7 +8,8 @@
 		"allowArbitraryExtensions": true,
 		"verbatimModuleSyntax": true,
 		"noEmit": true,
-		"lib": ["ESNext"]
+		"lib": ["ESNext"],
+		"skipLibCheck": true
 	},
 	"include": ["src"]
 }

@@ -1,5 +1,4 @@
 export const packageJson = {
-	private: true,
 	type: 'module',
 	scripts: {
 		start: 'bun build/index.js',
@@ -40,4 +39,17 @@ export const BIOME = {
 	formatter: {
 		enabled: false
 	}
+}
+
+// biome-ignore lint/style/useNamingConvention: <explanation>
+export function TSCONFIG(strict: boolean) {
+	return JSON.stringify({
+		extends: './.svelte-kit/tsconfig.json',
+		compilerOptions: {
+			checkJs: true,
+			esModuleInterop: true,
+			skipLibCheck: true,
+			strict
+		}
+	})
 }
