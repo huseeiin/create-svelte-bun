@@ -31,14 +31,19 @@ if (!api) intro(bgYellow('Create a new SvelteKit app using Bun.'))
 export async function createProject(opts: Options = {}) {
 	const random = `${faker.word.adjective()}-${faker.word.noun()}`
 
-	const projectName = api
-		? opts.name ?? random
-		: args.name ??
-			(await text({
-				message: 'Project name',
-				placeholder: random,
-				defaultValue: random
-			}))
+	// biome-ignore lint/style/useNamingConvention: <explanation>
+	const {Y} = args
+
+	const projectName = Y
+		? random
+		: api
+			? opts.name ?? random
+			: args.name ??
+				(await text({
+					message: 'Project name',
+					placeholder: random,
+					defaultValue: random
+				}))
 
 	if (!api && isCancel(projectName)) {
 		cancel('Operation cancelled.')
@@ -62,9 +67,11 @@ export async function createProject(opts: Options = {}) {
 		`Project path: ${pathToFileURL(projectName).href.replace(projectName, green(projectName))}`
 	)
 
+	const y = args.y || Y
+
 	const check = api
 		? opts.svelteCheck
-		: args.y ||
+		: y ||
 			args.check ||
 			(await confirm({
 				message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
@@ -86,7 +93,7 @@ export async function createProject(opts: Options = {}) {
 
 	const biome = api
 		? opts.biome
-		: args.y ||
+		: y ||
 			args.biome ||
 			(await confirm({
 				message: 'Use Biome linter? (Svelte support is planned)'
@@ -100,7 +107,7 @@ export async function createProject(opts: Options = {}) {
 
 	const strict = api
 		? opts.strictTs
-		: args.y ||
+		: y ||
 			args.strict ||
 			(await confirm({
 				message: 'Use strict TypeScript?'
