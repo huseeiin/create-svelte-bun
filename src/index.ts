@@ -89,7 +89,7 @@ export async function createProject(opts: Options = {}) {
 		DEV_DEPENDENCIES.push('svelte-check')
 
 		Object.assign(packageJson.scripts, {
-			check: 'bun postinstall && svelte-check'
+			check: 'svelte-kit sync && svelte-check'
 		})
 	}
 
@@ -161,6 +161,8 @@ export async function createProject(opts: Options = {}) {
 	})
 
 	await dev.exited
+
+	await $`cd ${projectName} && bun svelte-kit sync`
 
 	// s.stop()
 	;(api ? consola.info : outro)('🚀 Project created successfully! Thank you for your patience.')
