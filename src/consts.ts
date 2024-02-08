@@ -54,3 +54,12 @@ export function TSCONFIG(strict: boolean) {
 		}
 	})
 }
+
+const argv = process.argv.slice(2)
+
+export const args: {[key: string]: string | boolean | undefined} = {}
+
+for (const [index, arg] of argv.entries()) {
+	const value = argv[index + 1]
+	if (arg.startsWith('-')) args[arg.replaceAll('-', '')] = value ? value : true
+}

@@ -3,10 +3,18 @@ import {existsSync} from 'node:fs'
 import {resolve} from 'node:path'
 import {cancel, confirm, intro, isCancel, log, outro, text} from '@clack/prompts'
 import {faker} from '@faker-js/faker'
-import {$, pathToFileURL, spawn, which, write} from 'bun'
+import {$, pathToFileURL, spawn, which} from 'bun'
 import consola from 'consola'
 import {bgGray, bgYellow, bold, green} from 'kolorist'
-import {BIOME, DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, TSCONFIG, packageJson} from './consts'
+import {
+	BIOME,
+	DEPENDENCIES,
+	DEV_DEPENDENCIES,
+	EXTENSIONS,
+	TSCONFIG,
+	args,
+	packageJson
+} from './consts'
 
 interface Options {
 	name?: string
@@ -15,18 +23,18 @@ interface Options {
 	strictTs?: boolean
 }
 
-const argv = process.argv.slice(2)
-
-const args: {[key: string]: string | boolean | undefined} = {}
-
-for (const [index, arg] of argv.entries()) {
-	const value = argv[index + 1]
-	if (arg.startsWith('-')) args[arg.replaceAll('-', '')] = value ? value : true
-}
-
 const api = /*!import.meta.main*/ false
 
 ;(api ? consola.box : intro)(bgYellow('Create a new SvelteKit app using Bun.'))
+
+/**
+ * Create a new SvelteKit app using Bun.
+ * @param opts Project name (default is random/pretty name (ex: `closed-cop`)), enable `svelte-check`, biome or strict TS.
+ * @example
+ * ```js
+ * await createProject({ strictTs: true, svelteCheck: false, biome: false })
+ * ```
+ */
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
 export async function createProject(opts: Options = {}) {
@@ -111,12 +119,17 @@ export async function createProject(opts: Options = {}) {
 		process.exit(0)
 	}
 
+	function write(fileName: string, content: string) {
+		if (typeof projectName === 'string') return Bun.write(`${projectName}/${fileName}`, content)
+		return
+	}
+
 	await $`cp -r ${resolve(import.meta.dir, '../files')} ${projectName}`
 	await $`mv ${projectName}/_gitignore ${projectName}/.gitignore`
 
-	await write(`${projectName}/package.json`, JSON.stringify(packageJson))
+	await write('package.json', JSON.stringify(packageJson))
 
-	await write(`${projectName}/tsconfig.json`, TSCONFIG(!!strict))
+	await write('tsconfig.json', TSCONFIG(!!strict))
 
 	if (biome) {
 		DEV_DEPENDENCIES.push('@biomejs/biome')
@@ -124,10 +137,10 @@ export async function createProject(opts: Options = {}) {
 
 		Object.assign(packageJson.scripts, {lint: 'biome lint ./src'})
 
-		await write(`${projectName}/biome.json`, JSON.stringify(BIOME))
+		await write('biome.json', JSON.stringify(BIOME))
 	}
 
-	await write(`${projectName}/.vscode/extensions.json`, JSON.stringify(EXTENSIONS))
+	await write('.vscode/extensions.json', JSON.stringify(EXTENSIONS))
 
 	// const s = spinner()
 
