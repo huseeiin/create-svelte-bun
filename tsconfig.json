@@ -1,5 +1,4 @@
 {
-	"extends": "@tsconfig/strictest/tsconfig.json",
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "ESNext",
@@ -10,7 +9,23 @@
 		"noEmit": true,
 		"lib": ["ESNext"],
 		"skipLibCheck": true,
-		"noPropertyAccessFromIndexSignature": false
+		"strict": true,
+		"allowUnusedLabels": false,
+		"allowUnreachableCode": false,
+		"exactOptionalPropertyTypes": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": false,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"isolatedModules": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"allowImportingTsExtensions": true,
+		"allowJs": true
 	},
 	"include": ["src"]
 }

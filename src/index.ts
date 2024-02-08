@@ -64,12 +64,12 @@ export async function createProject(opts: Options = {}) {
 
 	const y = args.y || args?.Y
 
-	const check =
-		y ?? opts.svelteCheck ?? args.check ?? !api
-			? await confirm({
-					message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
-				})
-			: false
+	let check: boolean | symbol = !!y ?? !!opts.svelteCheck ?? !!args.check
+
+	if (!check && api)
+		check = await confirm({
+			message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
+		})
 
 	if (isCancel(check)) {
 		cancel('Operation cancelled.')
@@ -85,12 +85,12 @@ export async function createProject(opts: Options = {}) {
 		})
 	}
 
-	const biome =
-		y ?? opts.biome ?? args.biome ?? !api
-			? await confirm({
-					message: 'Use Biome linter? (Svelte support is planned)'
-				})
-			: false
+	let biome: boolean | symbol = !!y ?? !!opts.biome ?? !!args.biome
+
+	if (!biome && api)
+		biome = await confirm({
+			message: 'Use Biome linter? (Svelte support is planned)'
+		})
 
 	if (isCancel(biome)) {
 		cancel('Operation cancelled.')
@@ -98,12 +98,12 @@ export async function createProject(opts: Options = {}) {
 		process.exit(0)
 	}
 
-	const strict =
-		y ?? opts.strictTs ?? args.strict ?? !api
-			? await confirm({
-					message: 'Use strict TypeScript?'
-				})
-			: false
+	let strict: boolean | symbol = !!y ?? !!opts.strictTs ?? !!args.strict
+
+	if (!strict && api)
+		strict = await confirm({
+			message: 'Use strict TypeScript?'
+		})
 
 	if (isCancel(strict)) {
 		cancel('Operation cancelled.')
