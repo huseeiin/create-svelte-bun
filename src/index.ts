@@ -32,10 +32,10 @@ const api = /*!import.meta.main*/ false
 export async function createProject(opts: Options = {}) {
 	const random = `${faker.word.adjective()}-${faker.word.noun()}`
 
-	const projectName = args.Y
+	const projectName = args?.Y
 		? random
 		: api
-			? opts.name ?? random
+			? opts.name || random
 			: await text({
 					message: 'Project name',
 					placeholder: random,
@@ -62,9 +62,9 @@ export async function createProject(opts: Options = {}) {
 		`Project path: ${green(bold(pathToFileURL(projectName).href))}`
 	)
 
-	const y = args.y || args.Y
+	const y = args.y || args?.Y
 
-	let check: boolean | symbol = !!y ?? !!opts.svelteCheck ?? !!args.check
+	let check: boolean | symbol = !!y || !!opts.svelteCheck || !!args.check
 
 	if (!(check || api))
 		check = await confirm({
@@ -85,7 +85,7 @@ export async function createProject(opts: Options = {}) {
 		})
 	}
 
-	let biome: boolean | symbol = !!y ?? !!opts.biome ?? !!args.biome
+	let biome: boolean | symbol = !!y || !!opts.biome || !!args.biome
 
 	if (!(biome || api))
 		biome = await confirm({
@@ -98,7 +98,7 @@ export async function createProject(opts: Options = {}) {
 		process.exit(0)
 	}
 
-	let strict: boolean | symbol = !!y ?? !!opts.strictTs ?? !!args.strict
+	let strict: boolean | symbol = !!y || !!opts.strictTs || !!args.strict
 
 	if (!(strict || api))
 		strict = await confirm({
