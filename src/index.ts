@@ -32,7 +32,7 @@ const api = /*!import.meta.main*/ false
 export async function createProject(opts: Options = {}) {
 	const random = `${faker.word.adjective()}-${faker.word.noun()}`
 
-	const projectName = args?.Y
+	const projectName = args.Y
 		? random
 		: api
 			? opts.name ?? random
@@ -62,11 +62,11 @@ export async function createProject(opts: Options = {}) {
 		`Project path: ${green(bold(pathToFileURL(projectName).href))}`
 	)
 
-	const y = args.y || args?.Y
+	const y = args.y || args.Y
 
 	let check: boolean | symbol = !!y ?? !!opts.svelteCheck ?? !!args.check
 
-	if (!check && api)
+	if (!(check || api))
 		check = await confirm({
 			message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
 		})
@@ -87,7 +87,7 @@ export async function createProject(opts: Options = {}) {
 
 	let biome: boolean | symbol = !!y ?? !!opts.biome ?? !!args.biome
 
-	if (!biome && api)
+	if (!(biome || api))
 		biome = await confirm({
 			message: 'Use Biome linter? (Svelte support is planned)'
 		})
@@ -100,7 +100,7 @@ export async function createProject(opts: Options = {}) {
 
 	let strict: boolean | symbol = !!y ?? !!opts.strictTs ?? !!args.strict
 
-	if (!strict && api)
+	if (!(strict || api))
 		strict = await confirm({
 			message: 'Use strict TypeScript?'
 		})
