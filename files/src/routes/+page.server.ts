@@ -1,1 +1,1 @@
-export const load = () => ({ bunVer: Bun.version });
+export const load = () => ({bunVer: Bun.version})

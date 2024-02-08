@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
 import {existsSync} from 'node:fs'
+import {resolve} from 'node:path'
 import {cancel, confirm, intro, isCancel, log, outro, text} from '@clack/prompts'
 import {faker} from '@faker-js/faker'
 import {$, pathToFileURL, spawn, which, write} from 'bun'
-import {bgGray, bgYellow, green} from 'kolorist'
+import consola from 'consola'
+import {bgGray, bgYellow, bold, green} from 'kolorist'
 import {BIOME, DEPENDENCIES, DEV_DEPENDENCIES, EXTENSIONS, TSCONFIG, packageJson} from './consts'
-import {resolve} from 'node:path'
 
 interface Options {
 	name?: string
@@ -25,36 +26,30 @@ for (const [index, arg] of argv.entries()) {
 
 const api = /*!import.meta.main*/ false
 
-if (!api) intro(bgYellow('Create a new SvelteKit app using Bun.'))
+;(api ? consola.box : intro)(bgYellow('Create a new SvelteKit app using Bun.'))
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
 export async function createProject(opts: Options = {}) {
 	const random = `${faker.word.adjective()}-${faker.word.noun()}`
 
-	// biome-ignore lint/style/useNamingConvention: <explanation>
-	const {Y} = args
-
-	const projectName = Y
+	const projectName = args?.Y
 		? random
 		: api
 			? opts.name ?? random
-			: args.name ??
-				(await text({
+			: await text({
 					message: 'Project name',
 					placeholder: random,
 					defaultValue: random
-				}))
+				})
 
-	if (!api && isCancel(projectName)) {
+	if (isCancel(projectName)) {
 		cancel('Operation cancelled.')
 
 		process.exit(0)
 	}
 
-	if (typeof projectName !== 'string') return
-
 	if (existsSync(projectName)) {
-		if (api) throw new Error('A file or directory with the same name exists.')
+		if (api) consola.error('A file or directory with the same name exists.')
 
 		log.error('A file or directory with the same name exists. Trying a different one.')
 
@@ -63,19 +58,18 @@ export async function createProject(opts: Options = {}) {
 		return createProject()
 	}
 
-	;(api ? console.log : log.info)(
-		`Project path: ${pathToFileURL(projectName).href.replace(projectName, green(projectName))}`
+	;(api ? consola.info : log.info)(
+		`Project path: ${green(bold(pathToFileURL(projectName).href))}`
 	)
 
-	const y = args.y || Y
+	const y = args.y || args?.Y
 
-	const check = api
-		? opts.svelteCheck
-		: y ||
-			args.check ||
-			(await confirm({
-				message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
-			}))
+	const check =
+		y ?? opts.svelteCheck ?? args.check ?? !api
+			? await confirm({
+					message: `Use ${bgGray('svelte-check')} for typechecking and Svelte code quality?`
+				})
+			: false
 
 	if (isCancel(check)) {
 		cancel('Operation cancelled.')
@@ -91,13 +85,12 @@ export async function createProject(opts: Options = {}) {
 		})
 	}
 
-	const biome = api
-		? opts.biome
-		: y ||
-			args.biome ||
-			(await confirm({
-				message: 'Use Biome linter? (Svelte support is planned)'
-			}))
+	const biome =
+		y ?? opts.biome ?? args.biome ?? !api
+			? await confirm({
+					message: 'Use Biome linter? (Svelte support is planned)'
+				})
+			: false
 
 	if (isCancel(biome)) {
 		cancel('Operation cancelled.')
@@ -105,13 +98,12 @@ export async function createProject(opts: Options = {}) {
 		process.exit(0)
 	}
 
-	const strict = api
-		? opts.strictTs
-		: y ||
-			args.strict ||
-			(await confirm({
-				message: 'Use strict TypeScript?'
-			}))
+	const strict =
+		y ?? opts.strictTs ?? args.strict ?? !api
+			? await confirm({
+					message: 'Use strict TypeScript?'
+				})
+			: false
 
 	if (isCancel(strict)) {
 		cancel('Operation cancelled.')
@@ -158,7 +150,7 @@ export async function createProject(opts: Options = {}) {
 	await dev.exited
 
 	// s.stop()
-	;(api ? console.log : outro)('🚀 Project created successfully! Thank you for your patience.')
+	;(api ? consola.info : outro)('🚀 Project created successfully! Thank you for your patience.')
 
 	if (!api && which('code')) {
 		const open = await confirm({message: 'Open in VSCode?'})
